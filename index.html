@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP8266 Temperature and Fan Control</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .status {
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>ESP8266 Temperature and Fan Control</h1>
+  <div class="status">
+    <p>Temperature: <span id="temperature">Loading...</span> °C</p>
+    <p>Fan Status: <span id="fan-status">Loading...</span></p>
+  </div>
+  <button onclick="controlFan('ON')">Turn Fan ON</button>
+  <button onclick="controlFan('OFF')">Turn Fan OFF</button>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:3000');
+    
+    ws.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      if (data.topic === 'esp8266/temperature') {
+        document.getElementById('temperature').textContent = data.message;
+      } else if (data.topic === 'esp8266/fan/status') {
+        document.getElementById('fan-status').textContent = data.message;
+      }
+    };
+
+    function controlFan(command) {
+      ws.send(JSON.stringify({ topic: 'esp8266/fan/control', message: command }));
+    }
+  </script>
+</body>
+</html>
